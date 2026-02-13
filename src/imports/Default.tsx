@@ -7,6 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../app/components/ui/dropdown-menu";
+import { DeviceSwitcher } from "../app/components/DeviceSwitcher";
 import svgPaths from "./svg-2as483m1ai";
 
 function Svg() {
@@ -241,17 +242,34 @@ function BackgroundHorizontalBorder() {
   );
 }
 
-function DeviceTab({ isActive, onClick }: { isActive: boolean; onClick: () => void }) {
+function DeviceTab({
+  isActive,
+  onClick,
+  onDeviceIdClick,
+  currentDeviceId
+}: {
+  isActive: boolean;
+  onClick: () => void;
+  onDeviceIdClick: () => void;
+  currentDeviceId: string;
+}) {
   return (
     <div
-      onClick={onClick}
       className={`h-[44px] px-[12px] flex items-center gap-[8px] relative hover:bg-[#0f0f0f] transition-colors cursor-pointer ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
       data-name="Device Tab"
     >
       <div aria-hidden="true" className="absolute border-[#212121] border-r border-solid inset-0 pointer-events-none" />
-      <Svg />
-      <div className="flex flex-col font-['IBM_Plex_Sans:Regular',sans-serif] justify-center leading-[0] not-italic text-[#e5e5e5] text-[12px]">
-        <p className="leading-[20px]">837365</p>
+      <div onClick={onClick} className="flex items-center gap-[8px]">
+        <Svg />
+      </div>
+      <div
+        onClick={(e) => {
+          e.stopPropagation();
+          onDeviceIdClick();
+        }}
+        className="flex flex-col font-['IBM_Plex_Sans:Regular',sans-serif] justify-center leading-[0] not-italic text-[#e5e5e5] text-[12px] hover:text-[#4ade80] transition-colors"
+      >
+        <p className="leading-[20px]">{currentDeviceId}</p>
       </div>
     </div>
   );
@@ -366,12 +384,27 @@ function TimelineTab({ isActive, onClick }: { isActive: boolean; onClick: () => 
   );
 }
 
-function BackgroundHorizontalBorder1({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: 'device' | 'report' | 'applications' | 'network' | 'timeline') => void }) {
+function BackgroundHorizontalBorder1({
+  activeTab,
+  onTabChange,
+  onDeviceSwitcherClick,
+  currentDeviceId
+}: {
+  activeTab: string;
+  onTabChange: (tab: 'device' | 'report' | 'applications' | 'network' | 'timeline') => void;
+  onDeviceSwitcherClick: () => void;
+  currentDeviceId: string;
+}) {
   return (
     <div className="bg-[#0d0d0d] content-stretch flex items-center justify-between pb-px relative shrink-0 w-full" data-name="Background+HorizontalBorder">
       <div aria-hidden="true" className="absolute border-[#212121] border-b border-solid inset-0 pointer-events-none" />
       <div className="flex items-center">
-        <DeviceTab isActive={activeTab === 'device'} onClick={() => onTabChange('device')} />
+        <DeviceTab
+          isActive={activeTab === 'device'}
+          onClick={() => onTabChange('device')}
+          onDeviceIdClick={onDeviceSwitcherClick}
+          currentDeviceId={currentDeviceId}
+        />
         <BackgroundVerticalBorder2 isActive={activeTab === 'report'} onClick={() => onTabChange('report')} />
         <BackgroundVerticalBorder3 isActive={activeTab === 'applications'} onClick={() => onTabChange('applications')} />
         <BackgroundVerticalBorder4 isActive={activeTab === 'network'} onClick={() => onTabChange('network')} />
@@ -3318,12 +3351,31 @@ function IPUpdateFooter() {
 
 export default function Default() {
   const [activeTab, setActiveTab] = useState<'device' | 'report' | 'applications' | 'network' | 'timeline'>('device');
+  const [currentDeviceId, setCurrentDeviceId] = useState('837365');
+  const [isDeviceSwitcherOpen, setIsDeviceSwitcherOpen] = useState(false);
+
+  const handleDeviceSelect = (deviceId: string) => {
+    setCurrentDeviceId(deviceId);
+  };
 
   return (
     <div className="bg-[#080808] relative size-full flex flex-col" data-name="Default">
+      {/* Device Switcher Modal */}
+      <DeviceSwitcher
+        isOpen={isDeviceSwitcherOpen}
+        onClose={() => setIsDeviceSwitcherOpen(false)}
+        currentDeviceId={currentDeviceId}
+        onDeviceSelect={handleDeviceSelect}
+      />
+
       {/* Sticky Tab Bar with Buttons */}
       <div className="sticky top-0 z-20 bg-[#080808]">
-        <BackgroundHorizontalBorder1 activeTab={activeTab} onTabChange={setActiveTab} />
+        <BackgroundHorizontalBorder1
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          onDeviceSwitcherClick={() => setIsDeviceSwitcherOpen(true)}
+          currentDeviceId={currentDeviceId}
+        />
       </div>
 
       {/* Scrollable Content */}
