@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { User, Settings, MapPin, Grid3x3, Network, Wifi, Route, Sparkles, ShieldAlert, MoreVertical, Calendar, Flag, FileText, Globe } from "lucide-react";
+import { User, Settings, MapPin, Grid3x3, Network, Wifi, Route, Sparkles, ShieldAlert, MoreVertical, Calendar, Flag, FileText, Globe, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,7 @@ import svgPaths from "./svg-2as483m1ai";
 
 function Svg() {
   return (
-    <div className="relative shrink-0 size-[24px]" data-name="SVG">
+    <div className="relative shrink-0 size-[18px]" data-name="SVG">
       <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
         <g id="SVG">
           <path d={svgPaths.p1adf7700} id="Vector" stroke="var(--stroke-0, #9B9B9B)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
@@ -242,38 +242,6 @@ function BackgroundHorizontalBorder() {
   );
 }
 
-function DeviceTab({
-  isActive,
-  onClick,
-  onDeviceIdClick,
-  currentDeviceId
-}: {
-  isActive: boolean;
-  onClick: () => void;
-  onDeviceIdClick: () => void;
-  currentDeviceId: string;
-}) {
-  return (
-    <div
-      className={`h-[44px] px-[12px] flex items-center gap-[8px] relative hover:bg-[#0f0f0f] transition-colors cursor-pointer ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
-      data-name="Device Tab"
-    >
-      <div aria-hidden="true" className="absolute border-[#212121] border-r border-solid inset-0 pointer-events-none" />
-      <div onClick={onClick} className="flex items-center gap-[8px]">
-        <Svg />
-      </div>
-      <div
-        onClick={(e) => {
-          e.stopPropagation();
-          onDeviceIdClick();
-        }}
-        className="flex flex-col font-['IBM_Plex_Sans:Regular',sans-serif] justify-center leading-[0] not-italic text-[#e5e5e5] text-[12px] hover:text-[#4ade80] transition-colors"
-      >
-        <p className="leading-[20px]">{currentDeviceId}</p>
-      </div>
-    </div>
-  );
-}
 
 function BackgroundVerticalBorder() {
   return (
@@ -302,11 +270,11 @@ function BackgroundVerticalBorder2({ isActive, onClick }: { isActive: boolean; o
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`h-[44px] relative hover:bg-[#0f0f0f] transition-all cursor-pointer flex items-center gap-[8px] ${showLabel ? 'px-[12px]' : 'w-[44px] justify-center'} ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
+      className={`h-[44px] relative hover:bg-[#0f0f0f] transition-all duration-300 cursor-pointer flex items-center gap-[8px] ${showLabel ? 'px-[12px]' : 'w-[44px] justify-center'} ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
       data-name="Background+VerticalBorder"
     >
       <div aria-hidden="true" className="absolute border-[#212121] border-r border-solid inset-0 pointer-events-none" />
-      <FileText size={18} className={isActive ? 'text-[#e5e5e5]' : 'text-[#9b9b9b]'} />
+      {!showLabel && <FileText size={18} className={isActive ? 'text-[#e5e5e5]' : 'text-[#9b9b9b]'} />}
       {showLabel && (
         <div className="text-[12px] text-[#e5e5e5] font-['IBM_Plex_Sans:Regular',sans-serif] whitespace-nowrap">
           Report
@@ -325,11 +293,11 @@ function BackgroundVerticalBorder3({ isActive, onClick }: { isActive: boolean; o
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`h-[44px] relative hover:bg-[#0f0f0f] transition-all cursor-pointer flex items-center gap-[8px] ${showLabel ? 'px-[12px]' : 'w-[44px] justify-center'} ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
+      className={`h-[44px] relative hover:bg-[#0f0f0f] transition-all duration-300 cursor-pointer flex items-center gap-[8px] ${showLabel ? 'px-[12px]' : 'w-[44px] justify-center'} ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
       data-name="Background+VerticalBorder"
     >
       <div aria-hidden="true" className="absolute border-[#212121] border-r border-solid inset-0 pointer-events-none" />
-      <Grid3x3 size={18} className={isActive ? 'text-[#e5e5e5]' : 'text-[#9b9b9b]'} />
+      {!showLabel && <Grid3x3 size={18} className={isActive ? 'text-[#e5e5e5]' : 'text-[#9b9b9b]'} />}
       {showLabel && (
         <div className="text-[12px] text-[#e5e5e5] font-['IBM_Plex_Sans:Regular',sans-serif] whitespace-nowrap">
           Applications
@@ -348,11 +316,11 @@ function BackgroundVerticalBorder4({ isActive, onClick }: { isActive: boolean; o
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`h-[44px] relative hover:bg-[#0f0f0f] transition-all cursor-pointer flex items-center gap-[8px] ${showLabel ? 'px-[12px]' : 'w-[44px] justify-center'} ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
+      className={`h-[44px] relative hover:bg-[#0f0f0f] transition-all duration-300 cursor-pointer flex items-center gap-[8px] ${showLabel ? 'px-[12px]' : 'w-[44px] justify-center'} ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
       data-name="Background+VerticalBorder"
     >
       <div aria-hidden="true" className="absolute border-[#212121] border-r border-solid inset-0 pointer-events-none" />
-      <Globe size={18} className={isActive ? 'text-[#e5e5e5]' : 'text-[#9b9b9b]'} />
+      {!showLabel && <Globe size={18} className={isActive ? 'text-[#e5e5e5]' : 'text-[#9b9b9b]'} />}
       {showLabel && (
         <div className="text-[12px] text-[#e5e5e5] font-['IBM_Plex_Sans:Regular',sans-serif] whitespace-nowrap">
           WHOIS
@@ -371,13 +339,118 @@ function TimelineTab({ isActive, onClick }: { isActive: boolean; onClick: () => 
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`h-[44px] relative hover:bg-[#0f0f0f] transition-all cursor-pointer flex items-center gap-[8px] ${showLabel ? 'px-[12px]' : 'w-[44px] justify-center'} ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
+      className={`h-[44px] relative hover:bg-[#0f0f0f] transition-all duration-300 cursor-pointer flex items-center gap-[8px] ${showLabel ? 'px-[12px]' : 'w-[44px] justify-center'} ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
       data-name="Timeline Tab"
     >
-      <Calendar size={18} className={isActive ? 'text-[#e5e5e5]' : 'text-[#9b9b9b]'} />
+      {!showLabel && <Calendar size={18} className={isActive ? 'text-[#e5e5e5]' : 'text-[#9b9b9b]'} />}
       {showLabel && (
         <div className="text-[12px] text-[#e5e5e5] font-['IBM_Plex_Sans:Regular',sans-serif] whitespace-nowrap">
           Timeline
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FirstHeaderBar({
+  onDeviceSwitcherClick,
+  currentDeviceId,
+  onPrevDevice,
+  onNextDevice
+}: {
+  onDeviceSwitcherClick: () => void;
+  currentDeviceId: string;
+  onPrevDevice: () => void;
+  onNextDevice: () => void;
+}) {
+  return (
+    <div className="bg-[#0d0d0d] content-stretch flex items-center justify-between pb-px relative shrink-0 w-full border-b border-[#212121]" data-name="First Header Bar">
+      <div className="flex items-center h-[44px] px-[12px] gap-[8px]">
+        {/* Previous Device Arrow */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onPrevDevice();
+          }}
+          className="p-1 hover:bg-[#1a1a1a] rounded transition-colors"
+        >
+          <ChevronLeft size={14} className="text-[#9b9b9b] hover:text-[#e5e5e5]" />
+        </button>
+
+        <div className="flex items-center gap-[8px]">
+          <Svg />
+        </div>
+
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeviceSwitcherClick();
+          }}
+          className="flex flex-col font-['IBM_Plex_Sans:Regular',sans-serif] justify-center leading-[0] not-italic text-[#e5e5e5] text-[12px] hover:text-[#4ade80] transition-colors cursor-pointer"
+        >
+          <p className="leading-[20px]">{currentDeviceId}</p>
+        </div>
+
+        {/* Next Device Arrow */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onNextDevice();
+          }}
+          className="p-1 hover:bg-[#1a1a1a] rounded transition-colors"
+        >
+          <ChevronRight size={14} className="text-[#9b9b9b] hover:text-[#e5e5e5]" />
+        </button>
+      </div>
+
+      <div className="flex gap-[8px] items-center px-[16px]">
+        <FlagButton />
+        <ActionsMenu />
+        <ButtonCloseDrawer />
+      </div>
+    </div>
+  );
+}
+
+function SecondHeaderBar({
+  activeTab,
+  onTabChange
+}: {
+  activeTab: string;
+  onTabChange: (tab: 'device' | 'report' | 'applications' | 'network' | 'timeline') => void;
+}) {
+  return (
+    <div className="bg-[#0d0d0d] content-stretch flex items-center pb-px relative shrink-0 w-full" data-name="Second Header Bar">
+      <div aria-hidden="true" className="absolute border-[#212121] border-b border-solid inset-0 pointer-events-none" />
+      <div className="flex items-center">
+        <DeviceDetailsTab isActive={activeTab === 'device'} onClick={() => onTabChange('device')} />
+        <BackgroundVerticalBorder2 isActive={activeTab === 'report'} onClick={() => onTabChange('report')} />
+        <BackgroundVerticalBorder3 isActive={activeTab === 'applications'} onClick={() => onTabChange('applications')} />
+        <BackgroundVerticalBorder4 isActive={activeTab === 'network'} onClick={() => onTabChange('network')} />
+        <TimelineTab isActive={activeTab === 'timeline'} onClick={() => onTabChange('timeline')} />
+      </div>
+    </div>
+  );
+}
+
+function DeviceDetailsTab({ isActive, onClick }: { isActive: boolean; onClick: () => void }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const showLabel = isActive || isHovered;
+
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={`h-[44px] relative hover:bg-[#0f0f0f] transition-all duration-300 cursor-pointer flex items-center gap-[8px] ${
+        showLabel ? 'px-[12px]' : 'w-[44px] justify-center'
+      } ${isActive ? 'bg-[#1a1a1a]' : 'bg-[#080808]'}`}
+    >
+      <div aria-hidden="true" className="absolute border-[#212121] border-r border-solid inset-0 pointer-events-none" />
+      {!showLabel && <Svg className={isActive ? 'text-[#e5e5e5]' : 'text-[#9b9b9b]'} />}
+      {showLabel && (
+        <div className="text-[12px] text-[#e5e5e5] font-['IBM_Plex_Sans:Regular',sans-serif] whitespace-nowrap">
+          Device Details
         </div>
       )}
     </div>
@@ -388,33 +461,29 @@ function BackgroundHorizontalBorder1({
   activeTab,
   onTabChange,
   onDeviceSwitcherClick,
-  currentDeviceId
+  currentDeviceId,
+  onPrevDevice,
+  onNextDevice
 }: {
   activeTab: string;
   onTabChange: (tab: 'device' | 'report' | 'applications' | 'network' | 'timeline') => void;
   onDeviceSwitcherClick: () => void;
   currentDeviceId: string;
+  onPrevDevice: () => void;
+  onNextDevice: () => void;
 }) {
   return (
-    <div className="bg-[#0d0d0d] content-stretch flex items-center justify-between pb-px relative shrink-0 w-full" data-name="Background+HorizontalBorder">
-      <div aria-hidden="true" className="absolute border-[#212121] border-b border-solid inset-0 pointer-events-none" />
-      <div className="flex items-center">
-        <DeviceTab
-          isActive={activeTab === 'device'}
-          onClick={() => onTabChange('device')}
-          onDeviceIdClick={onDeviceSwitcherClick}
-          currentDeviceId={currentDeviceId}
-        />
-        <BackgroundVerticalBorder2 isActive={activeTab === 'report'} onClick={() => onTabChange('report')} />
-        <BackgroundVerticalBorder3 isActive={activeTab === 'applications'} onClick={() => onTabChange('applications')} />
-        <BackgroundVerticalBorder4 isActive={activeTab === 'network'} onClick={() => onTabChange('network')} />
-        <TimelineTab isActive={activeTab === 'timeline'} onClick={() => onTabChange('timeline')} />
-      </div>
-      <div className="flex gap-[8px] items-center px-[16px]">
-        <FlagButton />
-        <ActionsMenu />
-        <ButtonCloseDrawer />
-      </div>
+    <div className="bg-[#0d0d0d] content-stretch flex flex-col relative shrink-0 w-full" data-name="Background+HorizontalBorder">
+      <FirstHeaderBar
+        onDeviceSwitcherClick={onDeviceSwitcherClick}
+        currentDeviceId={currentDeviceId}
+        onPrevDevice={onPrevDevice}
+        onNextDevice={onNextDevice}
+      />
+      <SecondHeaderBar
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+      />
     </div>
   );
 }
@@ -3350,47 +3419,63 @@ function IPUpdateFooter() {
 }
 
 export default function Default() {
-  const [activeTab, setActiveTab] = useState<'device' | 'report' | 'applications' | 'network' | 'timeline'>('device');
+  const [activeTab, setActiveTab] = useState<'device' | 'report' | 'applications' | 'network' | 'timeline' | 'devices'>('device');
   const [currentDeviceId, setCurrentDeviceId] = useState('837365');
-  const [isDeviceSwitcherOpen, setIsDeviceSwitcherOpen] = useState(false);
+
+  // Mock device list for navigation
+  const mockDevices = Array.from({ length: 20 }, (_, i) => String(837365 + i));
+
+  const currentIndex = mockDevices.indexOf(currentDeviceId);
 
   const handleDeviceSelect = (deviceId: string) => {
     setCurrentDeviceId(deviceId);
+    setActiveTab('device'); // Return to device details view after selection
+  };
+
+  const handlePrevDevice = () => {
+    if (currentIndex > 0) {
+      setCurrentDeviceId(mockDevices[currentIndex - 1]);
+    }
+  };
+
+  const handleNextDevice = () => {
+    if (currentIndex < mockDevices.length - 1) {
+      setCurrentDeviceId(mockDevices[currentIndex + 1]);
+    }
   };
 
   return (
-    <div className="bg-[#080808] relative size-full flex flex-col" data-name="Default">
-      {/* Device Switcher Modal */}
-      <DeviceSwitcher
-        isOpen={isDeviceSwitcherOpen}
-        onClose={() => setIsDeviceSwitcherOpen(false)}
-        currentDeviceId={currentDeviceId}
-        onDeviceSelect={handleDeviceSelect}
-      />
-
-      {/* Sticky Tab Bar with Buttons */}
-      <div className="sticky top-0 z-20 bg-[#080808]">
-        <BackgroundHorizontalBorder1
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          onDeviceSwitcherClick={() => setIsDeviceSwitcherOpen(true)}
-          currentDeviceId={currentDeviceId}
-        />
-      </div>
+    <div className="bg-[#080808] relative w-[320px] h-full flex flex-col" data-name="Default">
+      {/* Sticky Tab Bar with Buttons - Hide when on devices view */}
+      {activeTab !== 'devices' && (
+        <div className="sticky top-0 z-20 bg-[#080808]">
+          <BackgroundHorizontalBorder1
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onDeviceSwitcherClick={() => setActiveTab('devices')}
+            currentDeviceId={currentDeviceId}
+            onPrevDevice={handlePrevDevice}
+            onNextDevice={handleNextDevice}
+          />
+        </div>
+      )}
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
         {activeTab === 'device' && <ReportList />}
         {activeTab === 'report' && <ThreatReportTable />}
         {activeTab === 'applications' && <ApplicationsList />}
         {activeTab === 'network' && <WhoisInfo />}
         {activeTab === 'timeline' && <TimelineTable />}
+        {activeTab === 'devices' && <DeviceSwitcher isOpen={true} onClose={() => setActiveTab('device')} currentDeviceId={currentDeviceId} onDeviceSelect={handleDeviceSelect} />}
       </div>
 
-      {/* Persistent Footer */}
-      <div className="shrink-0">
-        <IPUpdateFooter />
-      </div>
+      {/* Persistent Footer - Hide when on devices view */}
+      {activeTab !== 'devices' && (
+        <div className="shrink-0">
+          <IPUpdateFooter />
+        </div>
+      )}
 
       <div aria-hidden="true" className="absolute border-[#2b2b2b] border-l border-solid inset-0 pointer-events-none" />
     </div>

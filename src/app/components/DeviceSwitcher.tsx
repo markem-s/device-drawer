@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, X, Smartphone, MapPin, AlertTriangle } from "lucide-react";
+import { Search, X, Smartphone, MapPin, AlertTriangle, ChevronLeft, SlidersHorizontal } from "lucide-react";
 
 interface Device {
   id: string;
@@ -35,23 +35,56 @@ export function DeviceSwitcher({ isOpen, onClose, currentDeviceId, onDeviceSelec
   const [searchQuery, setSearchQuery] = useState("");
   const [devices] = useState<Device[]>(generateMockDevices());
   const [filteredDevices, setFilteredDevices] = useState<Device[]>(devices);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState<{
+    threatLevels: string[];
+    models: string[];
+    locations: string[];
+  }>({
+    threatLevels: [],
+    models: [],
+    locations: [],
+  });
 
-  // Filter devices based on search query
+  // Filter devices based on search query and filters
   useEffect(() => {
-    if (!searchQuery.trim()) {
-      setFilteredDevices(devices);
-      return;
+    let filtered = devices;
+
+    // Apply search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (device) =>
+          device.id.includes(query) ||
+          device.model.toLowerCase().includes(query) ||
+          device.location.toLowerCase().includes(query)
+      );
     }
 
-    const query = searchQuery.toLowerCase();
-    const filtered = devices.filter(
-      (device) =>
-        device.id.includes(query) ||
-        device.model.toLowerCase().includes(query) ||
-        device.location.toLowerCase().includes(query)
-    );
+    // Apply threat level filters
+    if (selectedFilters.threatLevels.length > 0) {
+      filtered = filtered.filter((device) => {
+        const label = getThreatLabel(device.threatScore);
+        return selectedFilters.threatLevels.includes(label);
+      });
+    }
+
+    // Apply model filters
+    if (selectedFilters.models.length > 0) {
+      filtered = filtered.filter((device) =>
+        selectedFilters.models.includes(device.model)
+      );
+    }
+
+    // Apply location filters
+    if (selectedFilters.locations.length > 0) {
+      filtered = filtered.filter((device) =>
+        selectedFilters.locations.includes(device.location)
+      );
+    }
+
     setFilteredDevices(filtered);
-  }, [searchQuery, devices]);
+  }, [searchQuery, devices, selectedFilters]);
 
   // Handle ESC key to close modal
   useEffect(() => {
@@ -82,119 +115,216 @@ export function DeviceSwitcher({ isOpen, onClose, currentDeviceId, onDeviceSelec
     return "LOW";
   };
 
-  // Get recently viewed devices (first 5 for demo)
-  const recentDevices = devices.slice(0, 5);
+  // Get unique values for filters
+  const uniqueModels = Array.from(new Set(devices.map((d) => d.model)));
+  const uniqueLocations = Array.from(new Set(devices.map((d) => d.location)));
+
+  const toggleFilter = (category: keyof typeof selectedFilters, value: string) => {
+    setSelectedFilters((prev) => {
+      const current = prev[category];
+      const updated = current.includes(value)
+        ? current.filter((item) => item !== value)
+        : [...current, value];
+      return { ...prev, [category]: updated };
+    });
+  };
+
+  const clearAllFilters = () => {
+    setSelectedFilters({
+      threatLevels: [],
+      models: [],
+      locations: [],
+    });
+  };
+
+  const hasActiveFilters =
+    selectedFilters.threatLevels.length > 0 ||
+    selectedFilters.models.length > 0 ||
+    selectedFilters.locations.length > 0;
+
+  if (!isOpen) return null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+    <div className="bg-[#080808] w-full h-full flex flex-col">
+      {/* Header - styled like FirstHeaderBar */}
+      <div className="bg-[#0d0d0d] content-stretch flex items-center justify-between pb-px relative shrink-0 w-full border-b border-[#212121]">
+        <div className="flex items-center h-[44px] px-[12px] gap-[8px]">
+          {/* Back Button */}
+          <button
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60]"
-          />
-
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed left-1/2 top-[10%] -translate-x-1/2 w-full max-w-[600px] z-[70] bg-[#0d0d0d] border border-[#2b2b2b] rounded-lg shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            className="p-1 hover:bg-[#1a1a1a] rounded transition-colors"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-[#2b2b2b]">
-              <h2 className="text-[14px] font-['IBM_Plex_Sans:Regular',sans-serif] text-[#e5e5e5] uppercase">
-                Switch Device
-              </h2>
-              <button
-                onClick={onClose}
-                className="p-1 hover:bg-[#1a1a1a] rounded transition-colors"
-              >
-                <X size={18} className="text-[#9b9b9b]" />
-              </button>
-            </div>
+            <ChevronLeft size={18} className="text-[#9b9b9b] hover:text-[#e5e5e5]" />
+          </button>
 
-            {/* Search Bar */}
-            <div className="p-4 border-b border-[#2b2b2b]">
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9b9b9b]" />
-                <input
-                  type="text"
-                  placeholder="Search by ID, model, or location..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-[#080808] border border-[#2b2b2b] rounded-md pl-10 pr-4 py-2 text-[12px] text-[#e5e5e5] placeholder-[#9b9b9b] focus:outline-none focus:border-[#4a4a4a] font-['IBM_Plex_Sans:Regular',sans-serif]"
-                  autoFocus
-                />
-              </div>
-            </div>
+          <h2 className="text-[12px] font-['IBM_Plex_Sans:Regular',sans-serif] text-[#e5e5e5]">
+            {devices.length} DEVICES
+          </h2>
+        </div>
+        <div className="flex gap-[8px] items-center px-[16px]">
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-[#1a1a1a] rounded transition-colors"
+          >
+            <X size={18} className="text-[#9b9b9b]" />
+          </button>
+        </div>
+      </div>
 
-            {/* Device List */}
-            <div className="max-h-[500px] overflow-y-auto scrollbar-thin">
-              {/* Recent Devices Section */}
-              {!searchQuery && (
-                <div className="p-4 border-b border-[#2b2b2b]">
-                  <div className="text-[10px] text-[#9b9b9b] uppercase font-['IBM_Plex_Sans:Regular',sans-serif] mb-3">
-                    Recent Devices
-                  </div>
-                  <div className="space-y-2">
-                    {recentDevices.map((device) => (
-                      <DeviceCard
-                        key={device.id}
-                        device={device}
-                        isActive={device.id === currentDeviceId}
-                        onClick={() => handleDeviceSelect(device.id)}
-                        getThreatColor={getThreatColor}
-                        getThreatLabel={getThreatLabel}
-                      />
-                    ))}
-                  </div>
-                </div>
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin">
+        {/* All Devices Section */}
+        <div className="p-4">
+          {/* Search Bar with Filter Button */}
+          <div className="flex gap-2 mb-4">
+            <div className="relative flex-1">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9b9b9b]" />
+              <input
+                type="text"
+                placeholder="Search by ID, model, or location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#080808] border border-[#2b2b2b] rounded-md pl-10 pr-4 py-2 text-[12px] text-[#e5e5e5] placeholder-[#9b9b9b] focus:outline-none focus:border-[#4a4a4a] font-['IBM_Plex_Sans:Regular',sans-serif]"
+                autoFocus
+              />
+            </div>
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className={`px-3 py-2 rounded-md border transition-colors flex items-center gap-2 shrink-0 ${
+                hasActiveFilters
+                  ? "bg-[#1a1a1a] border-[#4a4a4a] text-[#e5e5e5]"
+                  : "bg-[#080808] border-[#2b2b2b] text-[#9b9b9b] hover:bg-[#0f0f0f] hover:border-[#3a3a3a]"
+              }`}
+            >
+              <SlidersHorizontal size={16} />
+              {hasActiveFilters && (
+                <span className="text-[10px] bg-[#4ade80] text-[#080808] rounded-full w-4 h-4 flex items-center justify-center font-['IBM_Plex_Sans:Regular',sans-serif]">
+                  {selectedFilters.threatLevels.length + selectedFilters.models.length + selectedFilters.locations.length}
+                </span>
               )}
+            </button>
+          </div>
 
-              {/* All Devices Section */}
-              <div className="p-4">
-                <div className="text-[10px] text-[#9b9b9b] uppercase font-['IBM_Plex_Sans:Regular',sans-serif] mb-3">
-                  {searchQuery ? `Results (${filteredDevices.length})` : "All Devices"}
-                </div>
-                <div className="space-y-2">
-                  {filteredDevices.length > 0 ? (
-                    filteredDevices.map((device) => (
-                      <DeviceCard
-                        key={device.id}
-                        device={device}
-                        isActive={device.id === currentDeviceId}
-                        onClick={() => handleDeviceSelect(device.id)}
-                        getThreatColor={getThreatColor}
-                        getThreatLabel={getThreatLabel}
-                      />
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-[#9b9b9b] text-[12px] font-['IBM_Plex_Sans:Regular',sans-serif]">
-                      No devices found matching "{searchQuery}"
+          {/* Filter Panel */}
+          <AnimatePresence>
+            {isFilterOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-hidden mb-4"
+              >
+                <div className="bg-[#0d0d0d] border border-[#2b2b2b] rounded-md p-4">
+                  {/* Filter Header */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-[11px] text-[#e5e5e5] uppercase font-['IBM_Plex_Sans:Regular',sans-serif]">
+                      Filters
                     </div>
-                  )}
-                </div>
-              </div>
-            </div>
+                    {hasActiveFilters && (
+                      <button
+                        onClick={clearAllFilters}
+                        className="text-[10px] text-[#9b9b9b] hover:text-[#e5e5e5] transition-colors font-['IBM_Plex_Sans:Regular',sans-serif]"
+                      >
+                        Clear All
+                      </button>
+                    )}
+                  </div>
 
-            {/* Footer */}
-            <div className="p-3 border-t border-[#2b2b2b] bg-[#080808] rounded-b-lg">
-              <div className="text-[10px] text-[#9b9b9b] font-['IBM_Plex_Sans:Regular',sans-serif] text-center">
-                Press ESC to close • Use arrow keys to navigate
+                  {/* Threat Level Filter */}
+                  <div className="mb-4">
+                    <div className="text-[10px] text-[#9b9b9b] uppercase font-['IBM_Plex_Sans:Regular',sans-serif] mb-2">
+                      Threat Level
+                    </div>
+                    <div className="flex gap-2">
+                      {["HIGH", "MEDIUM", "LOW"].map((level) => (
+                        <button
+                          key={level}
+                          onClick={() => toggleFilter("threatLevels", level)}
+                          className={`px-3 py-1.5 rounded-md text-[10px] font-['IBM_Plex_Sans:Regular',sans-serif] transition-colors ${
+                            selectedFilters.threatLevels.includes(level)
+                              ? "bg-[#1a1a1a] border border-[#4a4a4a] text-[#e5e5e5]"
+                              : "bg-[#080808] border border-[#2b2b2b] text-[#9b9b9b] hover:bg-[#0f0f0f]"
+                          }`}
+                        >
+                          {level}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Model Filter */}
+                  <div className="mb-4">
+                    <div className="text-[10px] text-[#9b9b9b] uppercase font-['IBM_Plex_Sans:Regular',sans-serif] mb-2">
+                      Model
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {uniqueModels.map((model) => (
+                        <button
+                          key={model}
+                          onClick={() => toggleFilter("models", model)}
+                          className={`px-3 py-1.5 rounded-md text-[10px] font-['IBM_Plex_Sans:Regular',sans-serif] transition-colors ${
+                            selectedFilters.models.includes(model)
+                              ? "bg-[#1a1a1a] border border-[#4a4a4a] text-[#e5e5e5]"
+                              : "bg-[#080808] border border-[#2b2b2b] text-[#9b9b9b] hover:bg-[#0f0f0f]"
+                          }`}
+                        >
+                          {model}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Location Filter */}
+                  <div>
+                    <div className="text-[10px] text-[#9b9b9b] uppercase font-['IBM_Plex_Sans:Regular',sans-serif] mb-2">
+                      Location
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {uniqueLocations.map((location) => (
+                        <button
+                          key={location}
+                          onClick={() => toggleFilter("locations", location)}
+                          className={`px-3 py-1.5 rounded-md text-[10px] font-['IBM_Plex_Sans:Regular',sans-serif] transition-colors ${
+                            selectedFilters.locations.includes(location)
+                              ? "bg-[#1a1a1a] border border-[#4a4a4a] text-[#e5e5e5]"
+                              : "bg-[#080808] border border-[#2b2b2b] text-[#9b9b9b] hover:bg-[#0f0f0f]"
+                          }`}
+                        >
+                          {location}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="text-[10px] text-[#9b9b9b] uppercase font-['IBM_Plex_Sans:Regular',sans-serif] mb-3">
+            {searchQuery ? `Results (${filteredDevices.length})` : "All Devices"}
+          </div>
+          <div className="space-y-2">
+            {filteredDevices.length > 0 ? (
+              filteredDevices.map((device) => (
+                <DeviceCard
+                  key={device.id}
+                  device={device}
+                  isActive={device.id === currentDeviceId}
+                  onClick={() => handleDeviceSelect(device.id)}
+                  getThreatColor={getThreatColor}
+                  getThreatLabel={getThreatLabel}
+                />
+              ))
+            ) : (
+              <div className="text-center py-8 text-[#9b9b9b] text-[12px] font-['IBM_Plex_Sans:Regular',sans-serif]">
+                No devices found matching "{searchQuery}"
               </div>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
