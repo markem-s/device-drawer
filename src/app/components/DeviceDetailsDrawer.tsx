@@ -27,12 +27,10 @@ export function DeviceDetailsDrawer({ isOpen, onClose }: DeviceDetailsDrawerProp
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-full max-w-[450px] z-50 bg-[#080808] shadow-2xl border-l border-[#2b2b2b]"
+            className="fixed right-0 top-0 h-full w-[320px] z-50 bg-[#080808] shadow-2xl border-l border-[#2b2b2b]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="h-full w-full overflow-y-auto scrollbar-thin">
-              <DeviceDetailsContent onClose={onClose} />
-            </div>
+            <DeviceDetailsContent onClose={onClose} />
           </motion.div>
         </>
       )}
