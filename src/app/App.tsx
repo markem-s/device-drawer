@@ -5,17 +5,28 @@ export default function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (
-    <div className="size-full flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+    <div className="relative w-full h-screen bg-gray-900">
+      {/* Map/Background Image */}
+      <div className="absolute inset-0">
+        <img
+          src="/map.svg"
+          alt="Map"
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Floating button to open drawer */}
       <button
         onClick={() => setIsDrawerOpen(true)}
-        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+        className="absolute top-4 right-4 z-30 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow-lg transition-colors"
       >
         Open Device Details
       </button>
 
-      <DeviceDetailsDrawer 
-        isOpen={isDrawerOpen} 
-        onClose={() => setIsDrawerOpen(false)} 
+      {/* Device Drawer */}
+      <DeviceDetailsDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
       />
     </div>
   );
