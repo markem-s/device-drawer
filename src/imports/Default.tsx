@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { User, Settings, MapPin, Grid3x3, Network, Wifi, Route, Sparkles, ShieldAlert, MoreVertical, Calendar, Flag, FileText, Globe, ChevronLeft, ChevronRight } from "lucide-react";
+import { User, Settings, MapPin, Grid3x3, Network, Wifi, Route, Sparkles, ShieldAlert, MoreVertical, Calendar, Flag, FileText, Globe, ChevronLeft, ChevronRight, X } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,6 +8,9 @@ import {
   DropdownMenuTrigger,
 } from "../app/components/ui/dropdown-menu";
 import { DeviceSwitcher } from "../app/components/DeviceSwitcher";
+import { FlagDeviceModal } from "../app/components/FlagDeviceModal";
+import { WhoisResultsModal } from "../app/components/WhoisResultsModal";
+import { PlasmaLoadingBar } from "../app/components/PlasmaLoadingBar";
 import svgPaths from "./svg-2as483m1ai";
 
 function Svg() {
@@ -188,6 +191,18 @@ function ActionsMenu() {
   );
 }
 
+function CloseButton({ onClick }: { onClick?: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="bg-[#080808] content-stretch flex h-[32px] items-center justify-center p-[6px] relative rounded-[6px] shrink-0 hover:bg-[#1a1a1a] active:bg-[#2a2a2a] transition-colors cursor-pointer"
+      title="Close"
+    >
+      <X size={18} className="text-[#9b9b9b]" />
+    </button>
+  );
+}
+
 function ButtonCloseDrawer() {
   return (
     <div className="bg-[#080808] content-stretch flex h-[32px] items-center justify-center p-[6px] relative rounded-[6px] shrink-0 hover:bg-[#1a1a1a] active:bg-[#2a2a2a] transition-colors cursor-pointer" data-name="Button - Close drawer">
@@ -196,9 +211,13 @@ function ButtonCloseDrawer() {
   );
 }
 
-function FlagButton() {
+function FlagButton({ onClick }: { onClick: () => void }) {
   return (
-    <div className="bg-[#080808] content-stretch flex h-[32px] items-center justify-center p-[6px] relative rounded-[6px] shrink-0 hover:bg-[#1a1a1a] active:bg-[#2a2a2a] transition-colors cursor-pointer" data-name="Button - Flag">
+    <div
+      onClick={onClick}
+      className="bg-[#080808] content-stretch flex h-[32px] items-center justify-center p-[6px] relative rounded-[6px] shrink-0 hover:bg-[#1a1a1a] active:bg-[#2a2a2a] transition-colors cursor-pointer"
+      data-name="Button - Flag"
+    >
       <Flag size={16} className="text-[#e5e5e5]" />
     </div>
   );
@@ -212,7 +231,6 @@ function Container2() {
         <ButtonViewConnections />
         <ButtonAiAssistant />
         <ButtonAiAssistant1 />
-        <ButtonCloseDrawer />
       </div>
     </div>
   );
@@ -356,12 +374,16 @@ function FirstHeaderBar({
   onDeviceSwitcherClick,
   currentDeviceId,
   onPrevDevice,
-  onNextDevice
+  onNextDevice,
+  onFlagClick,
+  onClose
 }: {
   onDeviceSwitcherClick: () => void;
   currentDeviceId: string;
   onPrevDevice: () => void;
   onNextDevice: () => void;
+  onFlagClick: () => void;
+  onClose?: () => void;
 }) {
   return (
     <div className="bg-[#0d0d0d] content-stretch flex items-center justify-between pb-px relative shrink-0 w-full border-b border-[#212121]" data-name="First Header Bar">
@@ -404,9 +426,9 @@ function FirstHeaderBar({
       </div>
 
       <div className="flex gap-[8px] items-center px-[16px]">
-        <FlagButton />
+        <FlagButton onClick={onFlagClick} />
         <ActionsMenu />
-        <ButtonCloseDrawer />
+        {onClose && <CloseButton onClick={onClose} />}
       </div>
     </div>
   );
@@ -463,7 +485,9 @@ function BackgroundHorizontalBorder1({
   onDeviceSwitcherClick,
   currentDeviceId,
   onPrevDevice,
-  onNextDevice
+  onNextDevice,
+  onFlagClick,
+  onClose
 }: {
   activeTab: string;
   onTabChange: (tab: 'device' | 'report' | 'applications' | 'network' | 'timeline') => void;
@@ -471,6 +495,8 @@ function BackgroundHorizontalBorder1({
   currentDeviceId: string;
   onPrevDevice: () => void;
   onNextDevice: () => void;
+  onFlagClick: () => void;
+  onClose?: () => void;
 }) {
   return (
     <div className="bg-[#0d0d0d] content-stretch flex flex-col relative shrink-0 w-full" data-name="Background+HorizontalBorder">
@@ -479,6 +505,8 @@ function BackgroundHorizontalBorder1({
         currentDeviceId={currentDeviceId}
         onPrevDevice={onPrevDevice}
         onNextDevice={onNextDevice}
+        onFlagClick={onFlagClick}
+        onClose={onClose}
       />
       <SecondHeaderBar
         activeTab={activeTab}
@@ -3352,49 +3380,116 @@ function ThreatReportTable() {
   );
 }
 
-function WhoisInfo() {
-  const whoisData = `NetRange:       94.232.0.0 - 94.232.255.255
-CIDR:           94.232.0.0/16
-NetName:        IRANCELL-NET
-NetHandle:      NET-94-232-0-0-1
-Parent:         NET94 (NET-94-0-0-0-0)
-NetType:        Direct Allocation
-OriginAS:       AS44244
-Organization:   MTN Irancell (ICEL)
-RegDate:        2010-06-15
-Updated:        2023-08-22
-Ref:            https://rdap.arin.net/registry/ip/94.232.0.0
+interface WhoisData {
+  ipAddress: string;
+  netname: string;
+  organization: string;
+  country: string;
+  city: string;
+  isp: string;
+  asn: string;
+  lastUpdated: string;
+}
 
-OrgName:        MTN Irancell Telecommunications Services
-OrgId:          ICEL
-Address:        No. 27, Sanaei St.
-Address:        Karimkhan Zand Ave.
-City:           Tehran
-StateProv:      Tehran
-PostalCode:     15868-45517
-Country:        IR
-RegDate:        2010-04-20
-Updated:        2024-01-10
-Ref:            https://rdap.arin.net/registry/entity/ICEL
-
-OrgTechHandle:  IRAN5-ARIN
-OrgTechName:    Irancell Technical
-OrgTechPhone:   +98-21-88888888
-OrgTechEmail:   noc@mtn.irancell.ir
-OrgTechRef:     https://rdap.arin.net/registry/entity/IRAN5-ARIN
-
-OrgAbuseHandle: ABUSE5454-ARIN
-OrgAbuseName:   Abuse Department
-OrgAbusePhone:  +98-21-88888800
-OrgAbuseEmail:  abuse@mtn.irancell.ir
-OrgAbuseRef:    https://rdap.arin.net/registry/entity/ABUSE5454-ARIN`;
-
+function WhoisDataRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-[#080808] w-full p-4">
-      <div className="bg-[#0d0d0d] border border-[#2b2b2b] rounded-lg p-4">
-        <pre className="font-mono text-[11px] text-[#e5e5e5] whitespace-pre-wrap overflow-x-auto">
-          {whoisData}
-        </pre>
+    <div className="bg-[#0d0d0d] content-stretch flex h-[43px] items-center pb-px relative shrink-0 w-full">
+      <div aria-hidden="true" className="absolute border-[#212121] border-b border-solid inset-0 pointer-events-none" />
+      <div className="content-stretch flex items-center px-[16px] py-[12px] relative shrink-0 w-[132px]">
+        <div className="flex flex-col font-['IBM_Plex_Sans:Regular',sans-serif] justify-center leading-[0] not-italic relative shrink-0 text-[#9b9b9b] text-[12px] uppercase whitespace-nowrap">
+          <p className="leading-[20px]">{label}:</p>
+        </div>
+      </div>
+      <div className="flex-[1_0_0] min-h-px min-w-px relative">
+        <div className="flex flex-row items-center justify-end size-full">
+          <div className="content-stretch flex items-center justify-end px-[16px] py-[12px] relative w-full">
+            <div className="flex flex-[1_0_0] flex-col font-['IBM_Plex_Mono:Regular',monospace] justify-center leading-[0] min-h-px min-w-px not-italic relative text-[#e5e5e5] text-[12px] text-right">
+              <p className="leading-[20px] whitespace-pre-wrap">{value}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WhoisInfo({ whoisData, onFillWhois, isLoading, loadingProgress = 0, loadingPhase = '' }: { whoisData: WhoisData | null; onFillWhois: () => void; isLoading: boolean; loadingProgress?: number; loadingPhase?: string }) {
+  // Empty State
+  if (!whoisData) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex flex-col items-center text-center max-w-[280px]">
+          <div className="w-12 h-12 rounded-full bg-[#1a1a1a] flex items-center justify-center mb-4">
+            <Globe size={24} className="text-[#9b9b9b]" />
+          </div>
+
+          <h3 className="text-[14px] font-['IBM_Plex_Sans:Regular',sans-serif] text-[#e5e5e5] mb-2">
+            No WHOIS Data
+          </h3>
+
+          <p className="text-[12px] font-['IBM_Plex_Sans:Regular',sans-serif] text-[#9b9b9b] mb-6 leading-relaxed">
+            WHOIS information has not been retrieved yet. Click below to start the lookup process.
+          </p>
+
+          {isLoading ? (
+            <div className="w-full mb-4">
+              <PlasmaLoadingBar
+                progress={loadingProgress}
+                state="scanning"
+                phaseText={loadingPhase}
+                size="sm"
+                enablePlasmaEffect={true}
+                enableBorderAnimation={false}
+              />
+            </div>
+          ) : (
+            <button
+              onClick={onFillWhois}
+              className="px-4 py-2.5 bg-[#1a1a1a] hover:bg-[#242424] border border-[#2b2b2b] rounded-[8px] text-[13px] text-[#e5e5e5] font-['IBM_Plex_Sans:Regular',sans-serif] transition-colors flex items-center gap-2"
+            >
+              <Globe size={16} />
+              <span>Fill WHOIS Information</span>
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Filled State
+  return (
+    <div className="flex-1 flex flex-col">
+      {/* Reprocess Button or Loading Bar */}
+      <div className="bg-[#080808] px-4 py-3 border-b border-[#212121]">
+        {isLoading ? (
+          <PlasmaLoadingBar
+            progress={loadingProgress}
+            state="scanning"
+            phaseText={loadingPhase}
+            size="sm"
+            enablePlasmaEffect={true}
+            enableBorderAnimation={false}
+          />
+        ) : (
+          <button
+            onClick={onFillWhois}
+            className="w-full px-4 py-2.5 bg-[#1a1a1a] hover:bg-[#242424] border border-[#2b2b2b] rounded-[8px] text-[13px] text-[#e5e5e5] font-['IBM_Plex_Sans:Regular',sans-serif] transition-colors flex items-center justify-center gap-2"
+          >
+            <Globe size={16} />
+            <span>Reprocess WHOIS Lookup</span>
+          </button>
+        )}
+      </div>
+
+      {/* WHOIS Data Rows */}
+      <div className="flex-1 overflow-y-auto">
+        <WhoisDataRow label="IP Address" value={whoisData.ipAddress} />
+        <WhoisDataRow label="Network Name" value={whoisData.netname} />
+        <WhoisDataRow label="Organization" value={whoisData.organization} />
+        <WhoisDataRow label="Location" value={`${whoisData.city}, ${whoisData.country}`} />
+        <WhoisDataRow label="ISP" value={whoisData.isp} />
+        <WhoisDataRow label="ASN" value={whoisData.asn} />
+        <WhoisDataRow label="Last Updated" value={whoisData.lastUpdated} />
       </div>
     </div>
   );
@@ -3418,9 +3513,19 @@ function IPUpdateFooter() {
   );
 }
 
-export default function Default() {
+interface DefaultProps {
+  onClose?: () => void;
+}
+
+export default function Default({ onClose }: DefaultProps = {}) {
   const [activeTab, setActiveTab] = useState<'device' | 'report' | 'applications' | 'network' | 'timeline' | 'devices'>('device');
   const [currentDeviceId, setCurrentDeviceId] = useState('837365');
+  const [isFlagModalOpen, setIsFlagModalOpen] = useState(false);
+  const [isWhoisLoading, setIsWhoisLoading] = useState(false);
+  const [isWhoisModalOpen, setIsWhoisModalOpen] = useState(false);
+  const [whoisData, setWhoisData] = useState<WhoisData | null>(null);
+  const [whoisLoadingProgress, setWhoisLoadingProgress] = useState(0);
+  const [whoisLoadingPhase, setWhoisLoadingPhase] = useState('');
 
   // Mock device list for navigation
   const mockDevices = Array.from({ length: 20 }, (_, i) => String(837365 + i));
@@ -3444,6 +3549,59 @@ export default function Default() {
     }
   };
 
+  const handleFlagDevice = (name: string, description: string) => {
+    console.log('Flagged device:', { deviceId: currentDeviceId, name, description });
+    // Add your flag device logic here
+  };
+
+  const handleFillWhois = () => {
+    setIsWhoisLoading(true);
+    setWhoisLoadingProgress(0);
+    console.log("Triggering WHOIS information job...");
+
+    // WHOIS lookup phases
+    const phases = [
+      { progress: 15, text: 'Initializing lookup...', delay: 200 },
+      { progress: 30, text: 'Connecting to WHOIS server...', delay: 400 },
+      { progress: 50, text: 'Querying IP database...', delay: 600 },
+      { progress: 70, text: 'Retrieving network info...', delay: 800 },
+      { progress: 85, text: 'Processing response...', delay: 1000 },
+      { progress: 100, text: 'Lookup complete', delay: 1200 },
+    ];
+
+    // Simulate progressive loading
+    let currentPhaseIndex = 0;
+    const progressInterval = setInterval(() => {
+      if (currentPhaseIndex < phases.length) {
+        const phase = phases[currentPhaseIndex];
+        setWhoisLoadingProgress(phase.progress);
+        setWhoisLoadingPhase(phase.text);
+        currentPhaseIndex++;
+      } else {
+        clearInterval(progressInterval);
+        setIsWhoisLoading(false);
+        setIsWhoisModalOpen(true);
+        console.log("WHOIS information job completed");
+      }
+    }, 300);
+  };
+
+  const handleAcceptWhois = () => {
+    console.log("WHOIS data accepted");
+    // Save the WHOIS data
+    setWhoisData({
+      ipAddress: "94.232.46.172",
+      netname: "DIGITALOCEAN-94-232-46-0",
+      organization: "DigitalOcean, LLC",
+      country: "Netherlands",
+      city: "Amsterdam",
+      isp: "DigitalOcean",
+      asn: "AS14061",
+      lastUpdated: "2024-01-15",
+    });
+    setIsWhoisModalOpen(false);
+  };
+
   return (
     <div className="bg-[#080808] relative w-[320px] h-full flex flex-col" data-name="Default">
       {/* Sticky Tab Bar with Buttons - Hide when on devices view */}
@@ -3456,6 +3614,8 @@ export default function Default() {
             currentDeviceId={currentDeviceId}
             onPrevDevice={handlePrevDevice}
             onNextDevice={handleNextDevice}
+            onFlagClick={() => setIsFlagModalOpen(true)}
+            onClose={onClose}
           />
         </div>
       )}
@@ -3465,7 +3625,7 @@ export default function Default() {
         {activeTab === 'device' && <ReportList />}
         {activeTab === 'report' && <ThreatReportTable />}
         {activeTab === 'applications' && <ApplicationsList />}
-        {activeTab === 'network' && <WhoisInfo />}
+        {activeTab === 'network' && <WhoisInfo whoisData={whoisData} onFillWhois={handleFillWhois} isLoading={isWhoisLoading} loadingProgress={whoisLoadingProgress} loadingPhase={whoisLoadingPhase} />}
         {activeTab === 'timeline' && <TimelineTable />}
         {activeTab === 'devices' && <DeviceSwitcher isOpen={true} onClose={() => setActiveTab('device')} currentDeviceId={currentDeviceId} onDeviceSelect={handleDeviceSelect} />}
       </div>
@@ -3476,6 +3636,21 @@ export default function Default() {
           <IPUpdateFooter />
         </div>
       )}
+
+      {/* Flag Device Modal */}
+      <FlagDeviceModal
+        isOpen={isFlagModalOpen}
+        onClose={() => setIsFlagModalOpen(false)}
+        deviceId={currentDeviceId}
+        onSave={handleFlagDevice}
+      />
+
+      {/* WHOIS Results Modal */}
+      <WhoisResultsModal
+        isOpen={isWhoisModalOpen}
+        onClose={() => setIsWhoisModalOpen(false)}
+        onAccept={handleAcceptWhois}
+      />
 
       <div aria-hidden="true" className="absolute border-[#2b2b2b] border-l border-solid inset-0 pointer-events-none" />
     </div>
